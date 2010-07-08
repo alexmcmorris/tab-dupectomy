@@ -1,29 +1,5 @@
 <html>
 <head>
-<script>
-
-function entryPoint()
-{
-	chrome.tabs.getAllInWindow(null,function(tabs)
-	{
-		var existing = [];
-		for (var index in tabs)
-		{
-			var tab = tabs[index];
-			if (existing[tab.url.toLowerCase()])
-			{
-				chrome.tabs.remove(tab.id)
-			}
-			else
-			{
-			    existing[tab.url.toLowerCase()] = tab;
-			}
-		}
-	});
-}
-
-chrome.browserAction.onClicked.addListener(entryPoint);
-
-</script>
+<script type="text/javascript" src="td.js"></script>
 </head>
 </html>
