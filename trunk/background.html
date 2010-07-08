@@ -7,12 +7,16 @@ function entryPoint()
 	chrome.tabs.getAllInWindow(null,function(tabs)
 	{
 		var existing = [];
-		for (var i=0;i<tabs.length;i++){
-			tab = tabs[i];
-			if (existing[tab.url]) {
+		for (var index in tabs)
+		{
+			var tab = tabs[index];
+			if (existing[tab.url.toLowerCase()])
+			{
 				chrome.tabs.remove(tab.id)
-			} else {
-			    existing[tab.url] = tab;
+			}
+			else
+			{
+			    existing[tab.url.toLowerCase()] = tab;
 			}
 		}
 	});
