@@ -1,20 +1,19 @@
 
-function _DuplicateCloser_closeIfDuplicate(tab)
-{
-	if (this.existing[tab.url.toLowerCase()])
-	{
-		chrome.tabs.remove(tab.id);
-	}
-	else
-	{
-		this.existing[tab.url.toLowerCase()] = tab;
-	}
-}
-
 function DuplicateCloser()
 {
 	this.existing = [];
-	this.closeIfDuplicate = _DuplicateCloser_closeIfDuplicate;
+	
+	this.closeIfDuplicate = function(tab)
+	{
+		if (this.existing[tab.url.toLowerCase()])
+		{
+			chrome.tabs.remove(tab.id);
+		}
+		else
+		{
+			this.existing[tab.url.toLowerCase()] = tab;
+		}		
+	}
 }
 
 function closeDuplicateTabs(tabs)
