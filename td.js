@@ -1,29 +1,9 @@
 
-function DuplicateCloser()
+chrome.browserAction.onClicked.addListener(closeDuplicateTabsInCurrentWindow);
+
+function closeDuplicateTabsInCurrentWindow()
 {
-	this.tabs = [];
-	
-	this.exists = function(tab)
-	{
-		return this.tabs[tab.url.toLowerCase()];	
-	}
-	
-	this.remember = function(tab)
-	{
-		this.tabs[tab.url.toLowerCase()] = tab;
-	}
-	
-	this.closeIfDuplicate = function(tab)
-	{
-		if (this.exists(tab))
-		{
-			chrome.tabs.remove(tab.id);
-		}
-		else
-		{
-			this.remember(tab);
-		}		
-	}
+	chrome.tabs.getAllInWindow(null, closeDuplicateTabs);
 }
 
 function closeDuplicateTabs(tabs)
@@ -35,9 +15,34 @@ function closeDuplicateTabs(tabs)
 	}	
 }
 
-function entryPoint()
+function DuplicateCloser()
 {
-	chrome.tabs.getAllInWindow(null, closeDuplicateTabs);
+	this.cache = new TabCache();
+	
+	this.closeIfDuplicate = function(tab)
+	{
+		if (this.cache.exists(tab))
+		{
+			chrome.tabs.remove(tab.id);
+		}
+		else
+		{
+			this.cache.remember(tab);
+		}		
+	}
 }
 
-chrome.browserAction.onClicked.addListener(entryPoint);
+function TabCache()
+{
+	this.tabs = [];
+	
+	this.exists = function(tab)
+	{
+		return this.tabs[tab.url.toLowerCase()];	
+	}
+	
+	this.remember = function(tab)
+	{
+		this.tabs[tab.url.toLowerCase()] = tab;
+	}	
+}
