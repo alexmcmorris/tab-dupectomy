@@ -1,17 +1,27 @@
 
 function DuplicateCloser()
 {
-	this.existing = [];
+	this.tabs = [];
+	
+	this.exists = function(tab)
+	{
+		return this.tabs[tab.url.toLowerCase()];	
+	}
+	
+	this.remember = function(tab)
+	{
+		this.tabs[tab.url.toLowerCase()] = tab;
+	}
 	
 	this.closeIfDuplicate = function(tab)
 	{
-		if (this.existing[tab.url.toLowerCase()])
+		if (this.exists(tab))
 		{
 			chrome.tabs.remove(tab.id);
 		}
 		else
 		{
-			this.existing[tab.url.toLowerCase()] = tab;
+			this.remember(tab);
 		}		
 	}
 }
