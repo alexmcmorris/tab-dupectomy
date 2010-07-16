@@ -20,52 +20,53 @@ function countDuplicateSiblings(tab)
 
 function closeDuplicateTabs(tabs)
 {
-   var dupeCloser = new DuplicateCloser();
-   for (var index in tabs) 
-   {
-      dupeCloser.closeIfDuplicate(tabs[index]);
-   }
-   
+   processTabs(tabs, new Closer());
    showDuplicateCount(0);
 }
 
 function countDuplicateTabs(tabs)
 {
-   var dupeCounter = new DuplicateCounter();
+   var counter = new Counter();
+   processTabs(tabs, counter);
+   showDuplicateCount(counter.count);
+}
+
+function processTabs(tabs, implementation)
+{
+   var processor = new DuplicateProcessor(implementation);
    for (var index in tabs) 
    {
-      dupeCounter.countIfDuplicate(tabs[index]);
+      processor.process(tabs[index]);
    }
- 
-    showDuplicateCount(dupeCounter.count);
 }
 
 function showDuplicateCount(value)
 {
-	function BadgeText(value)
-	{
-	   if (value == 0) 
-	   {
-	      this.text = "";
-	   }
-	   else 
-	   {
-	      this.text = value + '';
-	   }
-	}
-
-    chrome.browserAction.setBadgeText(new BadgeText(value));
+   function BadgeText(value)
+   {
+      if (value == 0) 
+      {
+         this.text = "";
+      }
+      else 
+      {
+         this.text = value + '';
+      }
+   }
+   
+   chrome.browserAction.setBadgeText(new BadgeText(value));
 }
 
-function DuplicateCloser()
+function DuplicateProcessor(implementation)
 {
    this.cache = new TabCache();
+   this.implementation = implementation;
    
-   this.closeIfDuplicate = function(tab)
+   this.process = function(tab)
    {
       if (this.cache.exists(tab)) 
       {
-         chrome.tabs.remove(tab.id);
+         implementation.execute(tab);
       }
       else 
       {
@@ -74,21 +75,20 @@ function DuplicateCloser()
    }
 }
 
-function DuplicateCounter()
+function Counter()
 {
-   this.cache = new TabCache();
    this.count = 0;
-   
-   this.countIfDuplicate = function(tab)
+   this.execute = function(tab)
    {
-      if (this.cache.exists(tab)) 
-      {
-         this.count += 1;
-      }
-      else 
-      {
-         this.cache.remember(tab);
-      }
+      this.count += 1;
+   }
+}
+
+function Closer()
+{
+   this.execute = function(tab)
+   {
+      chrome.tabs.remove(tab.id);
    }
 }
 
