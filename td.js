@@ -42,19 +42,7 @@ function processTabs(tabs, implementation)
 
 function showDuplicateCount(value)
 {
-   function BadgeText(value)
-   {
-      if (value == 0) 
-      {
-         this.text = "";
-      }
-      else 
-      {
-         this.text = value + '';
-      }
-   }
-   
-   chrome.browserAction.setBadgeText(new BadgeText(value));
+   chrome.browserAction.setBadgeText(new BadgeValue(value));
 }
 
 function DuplicateProcessor(implementation)
@@ -106,4 +94,14 @@ function TabCache()
       this.tabs[tab.url.toLowerCase()] = tab;
    }
 }
+
+function BadgeValue(value)
+{
+   this.text = "";
+   if (value != 0) 
+   {
+      this.text = value + '';
+   }
+}
+
 
