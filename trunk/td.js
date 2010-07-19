@@ -8,11 +8,6 @@ function closeDuplicateTabsInCurrentWindow()
    chrome.tabs.getAllInWindow(null, closeDuplicateTabs);
 }
 
-function closeDuplicateSiblings(tab)
-{
-   chrome.tabs.getAllInWindow(tab.windowId, closeDuplicateTabs)
-}
-
 function countDuplicateSiblings(tab)
 {
    chrome.tabs.getAllInWindow(tab.windowId, countDuplicateTabs);
@@ -20,18 +15,18 @@ function countDuplicateSiblings(tab)
 
 function closeDuplicateTabs(tabs)
 {
-   processTabs(tabs, new Closer());
+   processDuplicates(tabs, new Closer());
    showDuplicateCount(0);
 }
 
 function countDuplicateTabs(tabs)
 {
    var counter = new Counter();
-   processTabs(tabs, counter);
+   processDuplicates(tabs, counter);
    showDuplicateCount(counter.count);
 }
 
-function processTabs(tabs, implementation)
+function processDuplicates(tabs, implementation)
 {
    var processor = new DuplicateProcessor(implementation);
    for (var index in tabs) 
