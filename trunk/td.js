@@ -17,6 +17,7 @@ function closeDuplicateTabs(tabs)
 {
    processDuplicates(tabs, new Closer());
    showDuplicateCount(0);
+   showDuplicatesInToolTip("Tab Dupectomy");
 }
 
 function countDuplicateTabs(tabs)
@@ -24,6 +25,7 @@ function countDuplicateTabs(tabs)
    var counter = new Counter();
    processDuplicates(tabs, counter);
    showDuplicateCount(counter.count);
+   showDuplicatesInToolTip(counter.title);
 }
 
 function processDuplicates(tabs, implementation)
@@ -38,6 +40,11 @@ function processDuplicates(tabs, implementation)
 function showDuplicateCount(value)
 {
    chrome.browserAction.setBadgeText(new BadgeValue(value));
+}
+
+function showDuplicatesInToolTip(value)
+{
+   chrome.browserAction.setTitle(new ToolTip(value));
 }
 
 function DuplicateProcessor(implementation)
@@ -61,9 +68,12 @@ function DuplicateProcessor(implementation)
 function Counter()
 {
    this.count = 0;
+   this.title = "";
    this.execute = function(tab)
    {
       this.count += 1;
+      this.title += tab.url;
+      this.title += "\n";
    }
 }
 
@@ -99,4 +109,8 @@ function BadgeValue(value)
    }
 }
 
+function ToolTip(value)
+{
+   this.title = value;
+}
 
