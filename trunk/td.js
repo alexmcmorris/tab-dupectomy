@@ -58,16 +58,17 @@ function DuplicateProcessor(implementation)
       }
    };
    
-   this.nonSelected = function(taba, tabb)
+   this.nonSelected = function(found, tab)
    {
-      if (!taba.selected)
+      if (!found.selected)
 	  {
-	     return taba;
+	     this.cache.remember(tab);
+	     return found;
 	  }
 	  
-	  if (!tabb.selected)
+	  if (!tab.selected)
 	  {
-	     return tabb;
+	     return tab;
 	  }
 	  
 	  return null;
