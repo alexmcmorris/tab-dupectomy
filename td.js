@@ -16,16 +16,14 @@ function countDuplicateSiblings(tab)
 function closeDuplicateTabs(tabs)
 {
    processDuplicates(tabs, new Closer());
-   showDuplicateCount(0);
-   showDuplicatesInToolTip("Tab Dupectomy");
+   updateDisplay(new Display());
 }
 
 function countDuplicateTabs(tabs)
 {
    var counter = new Counter();
    processDuplicates(tabs, counter);
-   showDuplicateCount(counter.count);
-   showDuplicatesInToolTip(counter.title);
+   updateDisplay(new Display(counter));
 }
 
 function processDuplicates(tabs, implementation)
@@ -37,44 +35,54 @@ function processDuplicates(tabs, implementation)
    }
 }
 
-function showDuplicateCount(value)
+function updateDisplay(display)
 {
-   chrome.browserAction.setBadgeText(new BadgeValue(value));
-}
-
-function showDuplicatesInToolTip(value)
-{
-   chrome.browserAction.setTitle(new ToolTip(value));
+   chrome.browserAction.setBadgeText({text: display.text});
+   chrome.browserAction.setTitle({title: display.title});
 }
 
 function DuplicateProcessor(implementation)
 {
    this.cache = new TabCache();
    this.implementation = implementation;
-   
    this.process = function(tab)
    {
-      if (this.cache.exists(tab)) 
-      {
-         implementation.execute(tab);
-      }
+      var found = this.cache.exists(tab);
+	  if (found)
+	  {
+	     implementation.execute(this.nonSelected(found, tab));
+	  }
       else 
       {
          this.cache.remember(tab);
       }
-   }
+   };
+   
+   this.nonSelected = function(taba, tabb)
+   {
+      if (!taba.selected)
+	  {
+	     return taba;
+	  }
+	  
+	  if (!tabb.selected)
+	  {
+	     return tabb;
+	  }
+	  
+	  return null;
+   };
 }
 
 function Counter()
 {
    this.count = 0;
-   this.title = "";
+   this.urls = "";
    this.execute = function(tab)
    {
       this.count += 1;
-      this.title += tab.url;
-      this.title += "\n";
-   }
+      this.urls += tab.url + '\n';
+   };
 }
 
 function Closer()
@@ -82,7 +90,7 @@ function Closer()
    this.execute = function(tab)
    {
       chrome.tabs.remove(tab.id);
-   }
+   };
 }
 
 function TabCache()
@@ -92,25 +100,27 @@ function TabCache()
    this.exists = function(tab)
    {
       return this.tabs[tab.url.toLowerCase()];
-   }
+   };
    
    this.remember = function(tab)
    {
       this.tabs[tab.url.toLowerCase()] = tab;
-   }
+   };
 }
 
-function BadgeValue(value)
+function Display()
 {
+   this.title = "Tab Dupectomy";
    this.text = "";
-   if (value != 0) 
+}
+
+function Display(counter)
+{
+   this.title = counter.urls;
+   this.text = "";
+
+   if (counter.count != 0)
    {
-      this.text = value + '';
+      this.text = counter.count + '';
    }
 }
-
-function ToolTip(value)
-{
-   this.title = value;
-}
-
