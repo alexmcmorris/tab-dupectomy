@@ -48,10 +48,10 @@ function DuplicateProcessor(implementation)
    this.process = function(tab)
    {
       var found = this.cache.exists(tab);
-	  if (found)
-	  {
-	     implementation.execute(this.nonSelected(found, tab));
-	  }
+      if (found)
+      {
+         implementation.execute(this.nonSelected(found, tab));
+      }
       else 
       {
          this.cache.remember(tab);
@@ -61,17 +61,17 @@ function DuplicateProcessor(implementation)
    this.nonSelected = function(found, tab)
    {
       if (!found.selected)
-	  {
-	     this.cache.remember(tab);
-	     return found;
-	  }
-	  
-	  if (!tab.selected)
-	  {
-	     return tab;
-	  }
-	  
-	  return null;
+      {
+         this.cache.remember(tab);
+         return found;
+      }
+    
+      if (!tab.selected)
+      {
+         return tab;
+      }
+    
+    return null;
    };
 }
 
