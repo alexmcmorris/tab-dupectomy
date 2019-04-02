@@ -1,7 +1,3 @@
-Fixed copy
-
----
-
 # tab-dupectomy
 Automatically exported from code.google.com/p/tab-dupectomy
 
