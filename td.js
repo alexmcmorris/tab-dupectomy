@@ -8,9 +8,11 @@ function closeDuplicateTabsInCurrentWindow()
    chrome.tabs.getAllInWindow(null, closeDuplicateTabs);
 }
 
-function countDuplicateSiblings(tab)
+function countDuplicateSiblings(tabId, changeInfo, tab)
 {
-   chrome.tabs.getAllInWindow(tab.windowId, countDuplicateTabs);
+   if (changeInfo.status && tab.status == 'complete') {
+      chrome.tabs.getAllInWindow(tab.windowId, countDuplicateTabs);
+   }
 }
 
 function closeDuplicateTabs(tabs)
