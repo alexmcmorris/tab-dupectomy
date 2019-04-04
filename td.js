@@ -12,13 +12,17 @@ function countDuplicateSiblings(tabId, changeInfo)
 {
    if (changeInfo.status == 'complete')
    {
-      chrome.tabs.getAllInWindow(changeInfo.windowId, countDuplicateTabs);
+      chrome.tabs.query({
+         "currentWindow": true
+      }, countDuplicateTabs);
    }
 }
 
-function countDuplicateSiblingsOnRemoved(tabId, removeInfo)
+function countDuplicateSiblingsOnRemoved()
 {
-   chrome.tabs.getAllInWindow(removeInfo.windowId, countDuplicateTabs)
+   chrome.tabs.query({
+      "currentWindow": true
+   }, countDuplicateTabs)
 }
 
 function closeDuplicateTabs(tabs)
