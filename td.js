@@ -1,4 +1,3 @@
-
 chrome.browserAction.onClicked.addListener(closeDuplicateTabsInCurrentWindow);
 chrome.tabs.onUpdated.addListener(countDuplicateSiblings);
 chrome.tabs.onRemoved.addListener(countDuplicateSiblingsOnRemoved);
@@ -10,7 +9,7 @@ function closeDuplicateTabsInCurrentWindow()
 
 function countDuplicateSiblings(tabId, changeInfo)
 {
-   if (changeInfo.status == 'complete')
+   if (changeInfo.status === 'complete')
    {
       chrome.tabs.query({
          "currentWindow": true
@@ -33,15 +32,15 @@ function closeDuplicateTabs(tabs)
 
 function countDuplicateTabs(tabs)
 {
-   var counter = new Counter();
+   const counter = new Counter();
    processDuplicates(tabs, counter);
    updateDisplay(new Display(counter));
 }
 
 function processDuplicates(tabs, implementation)
 {
-   var processor = new DuplicateProcessor(implementation);
-   for (var index in tabs) 
+   const processor = new DuplicateProcessor(implementation);
+   for (let index in tabs)
    {
       processor.process(tabs[index]);
    }
@@ -56,10 +55,9 @@ function updateDisplay(display)
 function DuplicateProcessor(implementation)
 {
    this.cache = new TabCache();
-   this.implementation = implementation;
    this.process = function(tab)
    {
-      var found = this.cache.exists(tab);
+      const found = this.cache.exists(tab);
       if (found)
       {
          implementation.execute(this.nonSelected(found, tab));
@@ -121,12 +119,6 @@ function TabCache()
    };
 }
 
-function Display()
-{
-   this.title = "Tab Dupectomy";
-   this.text = "";
-}
-
 function Display(counter)
 {
    if (!counter)
@@ -139,7 +131,7 @@ function Display(counter)
    this.title = counter.urls;
    this.text = "";
 
-   if (counter.count != 0)
+   if (counter.count !== 0)
    {
       this.text = counter.count + '';
    }
