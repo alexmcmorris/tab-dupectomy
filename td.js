@@ -125,6 +125,13 @@ function Display()
 
 function Display(counter)
 {
+   if (!counter)
+   {
+      this.title = "";
+      this.text = "";
+      return
+   }
+
    this.title = counter.urls;
    this.text = "";
 
