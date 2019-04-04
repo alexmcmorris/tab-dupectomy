@@ -1,18 +1,24 @@
 
 chrome.browserAction.onClicked.addListener(closeDuplicateTabsInCurrentWindow);
 chrome.tabs.onUpdated.addListener(countDuplicateSiblings);
-chrome.tabs.onRemoved.addListener(countDuplicateSiblings);
+chrome.tabs.onRemoved.addListener(countDuplicateSiblingsOnRemoved);
 
 function closeDuplicateTabsInCurrentWindow()
 {
-   chrome.tabs.getAllInWindow(null, closeDuplicateTabs);
+   chrome.tabs.getAllInWindow(closeDuplicateTabs);
 }
 
-function countDuplicateSiblings(tabId, changeInfo, tab)
+function countDuplicateSiblings(tabId, changeInfo)
 {
-   if (changeInfo.status && tab.status == 'complete') {
-      chrome.tabs.getAllInWindow(tab.windowId, countDuplicateTabs);
+   if (changeInfo.status == 'complete')
+   {
+      chrome.tabs.getAllInWindow(changeInfo.windowId, countDuplicateTabs);
    }
+}
+
+function countDuplicateSiblingsOnRemoved(tabId, removeInfo)
+{
+   chrome.tabs.getAllInWindow(removeInfo.windowId, countDuplicateTabs)
 }
 
 function closeDuplicateTabs(tabs)
@@ -119,6 +125,13 @@ function Display()
 
 function Display(counter)
 {
+   if (!counter)
+   {
+      this.title = "";
+      this.text = "";
+      return
+   }
+
    this.title = counter.urls;
    this.text = "";
 
