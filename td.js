@@ -4,45 +4,68 @@ chrome.tabs.onRemoved.addListener(countDuplicateSiblingsOnRemoved);
 
 function closeDuplicateTabsInCurrentWindow()
 {
-   chrome.tabs.getAllInWindow(closeDuplicateTabs);
+    chrome.windows.getAll(
+    {
+        "populate": true,
+        "windowTypes": ["normal"]
+    }, closeDuplicateTabs);
 }
 
 function countDuplicateSiblings(tabId, changeInfo)
 {
    if (changeInfo.status === 'complete')
    {
-      chrome.tabs.query({
-         "currentWindow": true
+      chrome.windows.getAll(
+      {
+          "populate": true,
+          "windowTypes": ["normal"]
       }, countDuplicateTabs);
    }
 }
 
 function countDuplicateSiblingsOnRemoved()
 {
-   chrome.tabs.query({
-      "currentWindow": true
-   }, countDuplicateTabs)
+    chrome.windows.getAll(
+    {
+        "populate": true,
+        "windowTypes": ["normal"]
+    }, countDuplicateTabs);
 }
 
-function closeDuplicateTabs(tabs)
+function closeDuplicateTabs(windows)
 {
+    let tabs = [];
+    for (let index in windows)
+    {
+        tabs.push(windows[index].tabs)
+    }
    processDuplicates(tabs, new Closer());
    updateDisplay(new Display());
 }
 
-function countDuplicateTabs(tabs)
+function countDuplicateTabs(windows)
 {
-   const counter = new Counter();
-   processDuplicates(tabs, counter);
-   updateDisplay(new Display(counter));
+    let tabs = [];
+    for (let index in windows)
+    {
+        tabs.push(windows[index].tabs)
+    }
+
+    const counter = new Counter();
+    processDuplicates(tabs, counter);
+    updateDisplay(new Display(counter));
 }
 
 function processDuplicates(tabs, implementation)
 {
    const processor = new DuplicateProcessor(implementation);
+
    for (let index in tabs)
    {
-      processor.process(tabs[index]);
+       for (let jIndex = 0; jIndex < tabs[index].length; jIndex++)
+       {
+           processor.process(tabs[index][jIndex]);
+       }
    }
 }
 
@@ -57,15 +80,14 @@ function DuplicateProcessor(implementation)
    this.cache = new TabCache();
    this.process = function(tab)
    {
-      const found = this.cache.exists(tab);
-      if (found)
-      {
-         implementation.execute(this.nonSelected(found, tab));
-      }
-      else 
-      {
-         this.cache.remember(tab);
-      }
+       const found = this.cache.exists(tab);
+
+       if (found)
+       {
+           implementation.execute(this.nonSelected(found, tab));
+       } else {
+           this.cache.remember(tab);
+       }
    };
    
    this.nonSelected = function(found, tab)
@@ -80,8 +102,18 @@ function DuplicateProcessor(implementation)
       {
          return tab;
       }
-    
-    return null;
+
+       lastWin = chrome.windows.getLastFocused(
+       {
+           "populate": false,
+           "windowTypes": ["normal"]
+       },
+       function(window)
+       {
+        return window.id
+       });
+    // this seems to work just fine, but does seem quite right
+    return tab;
    };
 }
 
@@ -91,8 +123,8 @@ function Counter()
    this.urls = "";
    this.execute = function(tab)
    {
-      this.count += 1;
-      this.urls += tab.url + '\n';
+       this.count += 1;
+       this.urls += tab.url + '\n';
    };
 }
 
