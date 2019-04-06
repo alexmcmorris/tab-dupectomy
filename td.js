@@ -103,15 +103,6 @@ function DuplicateProcessor(implementation)
          return tab;
       }
 
-       lastWin = chrome.windows.getLastFocused(
-       {
-           "populate": false,
-           "windowTypes": ["normal"]
-       },
-       function(window)
-       {
-        return window.id
-       });
     // this seems to work just fine, but does seem quite right
     return tab;
    };
