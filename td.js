@@ -1,37 +1,71 @@
-
-chrome.browserAction.onClicked.addListener(closeDuplicateTabsInCurrentWindow);
+chrome.browserAction.onClicked.addListener(closeDuplicateTabsInAllWindows);
 chrome.tabs.onUpdated.addListener(countDuplicateSiblings);
-chrome.tabs.onRemoved.addListener(countDuplicateSiblings);
+chrome.tabs.onRemoved.addListener(countDuplicateSiblingsOnRemoved);
 
-function closeDuplicateTabsInCurrentWindow()
+function closeDuplicateTabsInAllWindows()
 {
-   chrome.tabs.getAllInWindow(null, closeDuplicateTabs);
+    chrome.windows.getAll(
+    {
+        "populate": true,
+        "windowTypes": ["normal"]
+    }, closeDuplicateTabs);
 }
 
-function countDuplicateSiblings(tab)
+function countDuplicateSiblings(tabId, changeInfo)
 {
-   chrome.tabs.getAllInWindow(tab.windowId, countDuplicateTabs);
+   if (changeInfo.status === 'complete')
+   {
+      chrome.windows.getAll(
+      {
+          "populate": true,
+          "windowTypes": ["normal"]
+      }, countDuplicateTabs);
+   }
 }
 
-function closeDuplicateTabs(tabs)
+function countDuplicateSiblingsOnRemoved()
 {
+    chrome.windows.getAll(
+    {
+        "populate": true,
+        "windowTypes": ["normal"]
+    }, countDuplicateTabs);
+}
+
+function closeDuplicateTabs(windows)
+{
+    let tabs = [];
+    for (let index in windows)
+    {
+        tabs.push(windows[index].tabs)
+    }
    processDuplicates(tabs, new Closer());
    updateDisplay(new Display());
 }
 
-function countDuplicateTabs(tabs)
+function countDuplicateTabs(windows)
 {
-   var counter = new Counter();
-   processDuplicates(tabs, counter);
-   updateDisplay(new Display(counter));
+    let tabs = [];
+    for (let index in windows)
+    {
+        tabs.push(windows[index].tabs)
+    }
+
+    const counter = new Counter();
+    processDuplicates(tabs, counter);
+    updateDisplay(new Display(counter));
 }
 
 function processDuplicates(tabs, implementation)
 {
-   var processor = new DuplicateProcessor(implementation);
-   for (var index in tabs) 
+   const processor = new DuplicateProcessor(implementation);
+
+   for (let index in tabs)
    {
-      processor.process(tabs[index]);
+       for (let jIndex = 0; jIndex < tabs[index].length; jIndex++)
+       {
+           processor.process(tabs[index][jIndex]);
+       }
    }
 }
 
@@ -44,18 +78,16 @@ function updateDisplay(display)
 function DuplicateProcessor(implementation)
 {
    this.cache = new TabCache();
-   this.implementation = implementation;
    this.process = function(tab)
    {
-      var found = this.cache.exists(tab);
-      if (found)
-      {
-         implementation.execute(this.nonSelected(found, tab));
-      }
-      else 
-      {
-         this.cache.remember(tab);
-      }
+       const found = this.cache.exists(tab);
+
+       if (found)
+       {
+           implementation.execute(this.nonSelected(found, tab));
+       } else {
+           this.cache.remember(tab);
+       }
    };
    
    this.nonSelected = function(found, tab)
@@ -70,8 +102,9 @@ function DuplicateProcessor(implementation)
       {
          return tab;
       }
-    
-    return null;
+
+    // this seems to work just fine, but does seem quite right
+    return tab;
    };
 }
 
@@ -81,8 +114,8 @@ function Counter()
    this.urls = "";
    this.execute = function(tab)
    {
-      this.count += 1;
-      this.urls += tab.url + '\n';
+       this.count += 1;
+       this.urls += tab.url + '\n';
    };
 }
 
@@ -109,18 +142,19 @@ function TabCache()
    };
 }
 
-function Display()
-{
-   this.title = "Tab Dupectomy";
-   this.text = "";
-}
-
 function Display(counter)
 {
+   if (!counter)
+   {
+      this.title = "";
+      this.text = "";
+      return
+   }
+
    this.title = counter.urls;
    this.text = "";
 
-   if (counter.count != 0)
+   if (counter.count !== 0)
    {
       this.text = counter.count + '';
    }
