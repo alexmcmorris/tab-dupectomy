@@ -1,8 +1,8 @@
-chrome.browserAction.onClicked.addListener(closeDuplicateTabsInCurrentWindow);
+chrome.browserAction.onClicked.addListener(closeDuplicateTabsInAllWindows);
 chrome.tabs.onUpdated.addListener(countDuplicateSiblings);
 chrome.tabs.onRemoved.addListener(countDuplicateSiblingsOnRemoved);
 
-function closeDuplicateTabsInCurrentWindow()
+function closeDuplicateTabsInAllWindows()
 {
     chrome.windows.getAll(
     {
